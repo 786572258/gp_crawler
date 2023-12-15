@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>数据折线图</title>
+    <!-- 引入 ECharts 文件 -->
+    <script src="./echarts.min.js"></script>
+</head>
+<body>
+<!-- 为 ECharts 准备一个具备大小（宽高）的 DOM -->
+<div id="main" style="width: 1800px;height:1000px;"></div>
+<script type="text/javascript">
+    // 基于准备好的dom，初始化echarts实例
+    var myChart = echarts.init(document.getElementById('main'));
+    var stockData = {
+        // 'A': [1, 2, 3, 4, 5],
+        // 'B': [-4, -4, -7, 8, 3],
+        // 'C': [2, 3.5, 4.3, 2, 4]
+    };
+    var legendData = []
+    var series = []
+    var dateList = []
+    fetch('http://127.0.0.1:5000/api/industry_daily_data')
+        .then(response => response.json())
+        .then(data => {
+            // console.log(data); // 在这里处理获取到的 JSON 数据
+            stockData = data.data.industry_name_daily_data;
+            dateList = data.data.date_list;
+            for (var key in stockData) {
+                legendData.push(key)
+
+                series.push({
+                    name: key,
+                    type: 'line',
+                    data: convertData(stockData[key]),
+                    smooth: false,
+                    emphasis: {
+                        focus: 'series'  // 点击时高亮整个系列
+                    },
+                    lineStyle: {
+                        width: 2  // 调整折线宽度
+                    },
+                    label: {
+                        show: true,  // 显示标签
+                        position: 'top'  // 标签位置，可选值：top、bottom、left、right、inside、insideLeft、insideRight、insideTop、insideBottom
+                    }
+                })
+            }
+            console.log(series);
+            // console.log(legendData);
+            // 使用刚指定的配置项和数据显示图表。
+            myChart.setOption(option);
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
+
+    // 准备数据
+
+    // 转换数据格式
+    function convertData(data) {
+        console.log("结果：", data)
+        return data.map(function (value, index) {
+            // var dateStr = '2023-12-' + ('0' + (index + 1)).slice(-2);
+            var dateStr = dateList[index]
+            console.log(dateStr)
+            // return [new Date(dateStr), parseFloat(value)];  // Parse value as float or integer as needed
+
+            return [new Date(dateStr), value];
+        });
+    }
+
+    // 指定图表的配置项和数据
+    var option = {
+        title: {
+            text: '数据折线图'
+        },
+        tooltip: {
+            // trigger: 'axis',  // 触发类型，axis 表示鼠标悬停在坐标轴上时触发
+            // axisPointer: {
+            //     type: 'cross',  // 坐标轴指示器的类型，cross 表示十字准星
+            // },
+            // formatter: function (params) {
+            //     console.log(params)
+            //     var seriesName = params[0].seriesName;  // 获取系列名称
+            //     var timestamp = params[0].axisValue;  // 获取时间戳
+            //     // 使用 Date 对象格式化日期
+            //     var date = new Date(timestamp);
+            //     var formattedDate = date.getFullYear() + '-' + (date.getMonth() + 1) + '-' + date.getDate();
+            //     var value = params[0].value;  // 获取数值
+            //     var result = formattedDate + " " +seriesName + '<br>' + '涨跌幅: ' + value[1];
+            //     return result;
+            // },
+            // // 配置 tooltip 样式
+            // backgroundColor: 'rgba(255,255,255,0.9)',
+            // borderColor: '#ccc',
+            // borderWidth: 1,
+            // padding: 10,
+            // textStyle: {
+            //     color: '#333',
+            //     fontSize: 12
+            // }
+        },
+        toolbox: {
+            feature: {
+                dataZoom: {
+                    yAxisIndex: 'none'
+                },
+                dataView: {readOnly: false},
+                magicType: {type: ['line', 'bar']},
+                restore: {},
+                saveAsImage: {}
+            }
+        },
+        legend: {
+            data: legendData
+        },
+        // dataZoom: [{
+        //     type: 'slider',
+        //     xAxisIndex: [0],
+        //     start: 0,
+        //     end: 1000
+        // }],
+        dataZoom: [
+            {
+                type: 'inside',  // 内置型数据区域缩放组件
+                xAxisIndex: [0],  // 对哪个 x 轴进行缩放，可以设置多个
+                start: 0,  // 缩放范围的起始百分比
+                end: 100,   // 缩放范围的结束百分比
+            },
+            {
+                show: true,  // 外置型数据区域缩放组件
+                type: 'slider',  // 滑动条型数据区域缩放组件
+                xAxisIndex: [0],  // 对哪个 x 轴进行缩放，可以设置多个
+                start: 0,  // 缩放范围的起始百分比
+                end: 100,   // 缩放范围的结束百分比
+            }
+        ],
+        xAxis: {
+            type: "time",
+            //min: new Date("开始时间"),
+            //max: new Date("结束时间"),
+            axisLabel: {
+                interale: 0,
+                rotate: -40, //设置日期显示样式（倾斜度）
+                formatter: function (value) {//在这里写你需要的时间格式
+                    var t_date = new Date(value);
+                    return [t_date.getFullYear(), t_date.getMonth() + 1, t_date.getDate()].join('-')
+                    // + " " + [t_date.getHours(), t_date.getMinutes()].join(':'); 时分
+                }
+            }
+        },
+        yAxis: {
+            type: 'value'
+        },
+        series: series
+    };
+
+
+</script>
+</body>
+</html>
