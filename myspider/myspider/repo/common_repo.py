@@ -2,7 +2,7 @@ from datetime import datetime, timedelta
 
 import pymysql
 
-from utils import db_utils
+from myspider.utils import db_utils
 
 
 class CommonRepo:

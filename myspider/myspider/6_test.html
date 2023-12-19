@@ -58,9 +58,35 @@
 
         function calculatePercentageChanges(prices) {
             var changes = [0];  // 第一个值为0，因为没有前一个值
-            var initialPrice = prices[0];
+            var initialPrice = prices[0] // 有可能前几个都是0
+            var indexAfterZero = 0
+            if (prices[0] == 0) {
+                const indexOfZero = prices.indexOf(0);
+                if (indexOfZero !== -1) {
+                    indexAfterZero = indexOfZero + 1;
+
+                    while (indexAfterZero < prices.length && prices[indexAfterZero] === 0) {
+                        indexAfterZero++;
+                    }
+
+                    if (indexAfterZero < prices.length) {
+                        // console.log("首次出现非零数字的索引:", indexAfterZero);
+                        initialPrice = prices[indexAfterZero]
+                    } else {
+                        console.log("数组中没有非零数字");
+                    }
+                } else {
+                    console.log("数组中没有 0");
+                }
+            }
+
+            var change = 0
             for (var i = 1; i < prices.length; i++) {
-                var change = ((prices[i] - initialPrice) / initialPrice) * 100;
+                if (i <= indexAfterZero) {
+                    change = 0
+                } else {
+                    change = ((prices[i] - initialPrice) / initialPrice) * 100;
+                }
                 changes.push(change);
             }
             return changes;
@@ -80,64 +106,60 @@
         // 获取特定参数的值
         var days = params.get('days');
 
-        fetch('http://127.0.0.1:5000/api/industry_daily_data?days='+days)
-        .then(response => response.json())
-        .then(data => {
 
-            // console.log(data); // 在这里处理获取到的 JSON 数据
-            stockData = data.data.industry_name_daily_data;
-            dateList = data.data.date_list;
-            var index = 0
-            for (var key in stockData) {
-                index += 1
-                legendList.push(`${key}${index}`)
-                stockPriceList.push(stockData[key])
-            }
-            console.log("dateList=====", dateList);
-            console.log("legendList=====", legendList);
-            console.log("stockPriceList=====", stockPriceList);
-            // console.log(legendList);
-            // 使用刚指定的配置项和数据显示图表。
-            option = generateOption()
-            myChart.setOption(option);
+        // console.log(data); // 在这里处理获取到的 JSON 数据
+        stockData = {
+            'A': [111, 116, 134, 120, 121],
+            'B': [124, 111, 134, 125, 121],
+            'C': [0, 0, 0, 120, 110],
+        };
+        dateList = [20230101, 20230102, 20230103, 20230104, 20230105, ];
+        var index = 0
+        for (var key in stockData) {
+            index += 1
+            legendList.push(`${key}${index}`)
+            stockPriceList.push(stockData[key])
+        }
+        console.log("dateList=====", dateList);
+        console.log("legendList=====", legendList);
+        console.log("stockPriceList=====", stockPriceList);
+        // console.log(legendList);
+        // 使用刚指定的配置项和数据显示图表。
+        option = generateOption()
+        myChart.setOption(option);
 
-            // 注册点击事件
-            // myChart.on('click', function (params) {
-            //     console.log(params)
-            //     // 触发显示提示框的行为
-            //     myChart.dispatchAction({
-            //         type: 'showTip',
-            //         seriesIndex: 0, // 你的折线图可能有多个系列，选择相应的系列
-            //         dataIndex: params.dataIndex // 数据索引
-            //     });
-            // });
+        // 注册点击事件
+        // myChart.on('click', function (params) {
+        //     console.log(params)
+        //     // 触发显示提示框的行为
+        //     myChart.dispatchAction({
+        //         type: 'showTip',
+        //         seriesIndex: 0, // 你的折线图可能有多个系列，选择相应的系列
+        //         dataIndex: params.dataIndex // 数据索引
+        //     });
+        // });
 
-            // myChart.on('mouseover', 'series.line', function(params) {
-            //     console.log(params)
-            //
-            // });
+        // myChart.on('mouseover', 'series.line', function(params) {
+        //     console.log(params)
+        //
+        // });
 
-                        // 注册点击事件
-            myChart.on('click', function (params) {
-                console.log(params)
-                // 更新配置，将点击的系列设置为高亮状态
-                var newOption = {
-                    series: [{
-                        emphasis: {
-                            focus: 'series', // 高亮整个系列
-                            blurScope: 'coordinateSystem' // 高亮仍然保持，直到鼠标离开坐标系
-                        }
-                    }]
-                };
+                    // 注册点击事件
+        myChart.on('click', function (params) {
+            console.log(params)
+            // 更新配置，将点击的系列设置为高亮状态
+            var newOption = {
+                series: [{
+                    emphasis: {
+                        focus: 'series', // 高亮整个系列
+                        blurScope: 'coordinateSystem' // 高亮仍然保持，直到鼠标离开坐标系
+                    }
+                }]
+            };
 
-                // 使用 setOption 方法更新配置
-                myChart.setOption(newOption);
+            // 使用 setOption 方法更新配置
+            myChart.setOption(newOption);
 
-            });
-
-        })
-        .catch(error => {
-            console.error('Error:', error);
         });
 
         function generateOption() {

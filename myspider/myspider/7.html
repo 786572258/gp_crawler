@@ -1,0 +1,232 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="utf-8">
+    <link rel="icon" href="https://jscdn.com.cn/highcharts/images/favicon.ico">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        /* css 代码  */
+    </style>
+    <script src="https://img.hcharts.cn/jquery/jquery-1.8.3.min.js"></script>
+    <script src="./highstock.js"></script>
+    <script src="./exporting.js"></script>
+    <script src="./zh_cn-1.4.0.min.js"></script>
+</head>
+<style>
+    body {
+        padding: 0;
+        margin: 0;
+    }
+    html,body{
+        height: 100%;
+        width: 100%;
+    }
+    html{
+        height: 100%;
+        width: 100%;
+    }
+
+    /*#container{*/
+    /*    position: fixed;*/
+    /*    width: 1px;*/
+    /*    height: 400px;*/
+    /*    margin: auto;*/
+    /*    background-color: white;*/
+    /*    top: 0;*/
+    /*    left: 0;*/
+    /*    right: 0;*/
+    /*    bottom: 0;*/
+    /*}*/
+</style>
+
+<body>
+<div id="container" style="width: 100%; height: 90%"></div>
+<script>
+    var currentUrl = window.location.href;
+
+    // 使用 URL 对象解析 URL
+    var url = new URL(currentUrl);
+
+    // 使用 URLSearchParams 获取参数
+    var params = new URLSearchParams(url.search);
+
+    // 获取特定参数的值
+    var days = params.get('days');
+
+    var seriesOptions = [];
+
+    var chart = null
+    var selectedPoint = null
+    // create the chart when all data is loaded
+    var createChart = function () {
+        return Highcharts.stockChart('container', {
+            chart: {
+                type: 'line',
+                events: {
+                    load: function () {
+                        // 在图表加载后，将焦点设置在第一个点上
+                        this.series[0].points[0].select();
+                    }
+                }
+            },
+            // 图例配置
+            legend: {
+                enabled: true, // 设置为 true 以启用图例，默认为 true
+                align: 'center', // 图例的水平对齐方式：'left', 'center', 'right'
+                verticalAlign: 'top', // 图例的垂直对齐方式：'top', 'middle', 'bottom'
+                layout: 'horizontal', // 图例的布局方式：'horizontal'（水平）或 'vertical'（垂直）
+                borderWidth: 1, // 图例边框的宽度
+                borderRadius: 5, // 图例边框的圆角半径
+                borderColor: '#ccc', // 图例边框的颜色
+                itemStyle: {
+                    color: '#333' // 图例项的文本颜色
+                },
+                itemHoverStyle: {
+                    color: '#000' // 图例项的悬停时文本颜色
+                },
+                // labelFormatter: function () {
+                //     return this.name + ' <span class="toggle" onclick="toggleSeries(\'' + this.name + '\')">Toggle</span>';
+                // }
+                itemEvents: {
+                    legendItemClick: function () {
+                        var series = this.chart.series;
+                        var index = this.index;
+                        var isVisible = series[index].visible;
+
+                        series.forEach(function (s) {
+                            s.setVisible(!isVisible, false);
+                        });
+                    }
+                }
+            },
+            rangeSelector: {
+                selected: 4
+            },
+            yAxis: {
+                labels: {
+                    formatter: function () {
+                        return (this.value > 0 ? ' + ' : '') + this.value + '%';
+                    }
+                },
+                plotLines: [{
+                    value: 0,
+                    width: 2,
+                    color: 'silver'
+                }]
+            },
+            plotOptions: {
+                series: {
+                    compare: 'percent'
+                }
+            },
+            tooltip: {
+                pointFormat: '<span style="color:{series.color}">{series.name}</span>: <b>{point.y}</b> ({point.change}%)<br/>',
+                valueDecimals: 2
+            },
+            series: seriesOptions
+        });
+    };
+
+    // console.log(name + "===", data)
+    // var data = {
+    //     "data": {
+    //         "industry_name_daily_data": {
+    //             'A': [111, 116, 134, 120, 121],
+    //             'B': [124, 111, 134, 125, 121],
+    //             'C': [0, 0, 0, 120, 110, 110],
+    //         },
+    //         "date_list":[20230101, 20230102, 20230103, 20230104, 20230105, ]
+    //     }
+    // }
+
+
+    $.getJSON('http://127.0.0.1:5000/api/industry_daily_data_v2?days='+days, function (data) {
+        console.log(data)
+        var i = 0;
+        for(var name in data.data.industry_name_daily_data) {
+            console.log(name)
+            console.log(data.data.industry_name_daily_data[name])
+            seriesOptions[i] = {
+                name: name + i,
+                data: data.data.industry_name_daily_data[name]
+            };
+            i++;
+        }
+        chart = createChart();
+        // 当前选中的点
+        selectedPoint = chart.series[0].points[0];
+    });
+
+
+    // $.each(names, function (i, name) {
+    //     $.getJSON('https://data.jianshukeji.com/jsonp?filename=json/' + name.toLowerCase() + '-c.json&callback=?', function (data) {
+    //
+    //     });
+    // });
+    function toggleAllSeries() {
+        console.log(chart)
+        var series = chart.series;
+        var allVisible = series.every(function (s) {
+            return s.visible;
+        });
+
+        series.forEach(function (s) {
+            s.setVisible(!allVisible, false);
+        });
+    }
+
+
+
+    // 监听键盘事件
+    document.addEventListener('keydown', function (event) {
+        switch (event.key) {
+            case 'ArrowUp':
+                moveSelectedPoint('up');
+                break;
+            case 'ArrowDown':
+                moveSelectedPoint('down');
+                break;
+            case 'ArrowLeft':
+                moveSelectedPoint('left');
+                break;
+            case 'ArrowRight':
+                moveSelectedPoint('right');
+                break;
+        }
+    });
+
+    // 移动选中的点
+    function moveSelectedPoint(direction) {
+        var currentIndex = selectedPoint.index;
+        var seriesData = chart.series[0].data;
+        var newIndex;
+
+        switch (direction) {
+            case 'up':
+                newIndex = currentIndex - 1;
+                break;
+            case 'down':
+                newIndex = currentIndex + 1;
+                break;
+            case 'left':
+                newIndex = currentIndex - 1;
+                break;
+            case 'right':
+                newIndex = currentIndex + 1;
+                break;
+        }
+
+        // 确保新索引在有效范围内
+        newIndex = Math.max(0, Math.min(seriesData.length - 1, newIndex));
+
+        // 移动选中点
+        selectedPoint.select(false); // 取消当前点的选择
+        selectedPoint = seriesData[newIndex];
+        selectedPoint.select(); // 选中新的点
+    }
+</script>
+<input type="checkbox" id="selectAll" onchange="toggleAllSeries()">
+<label for="selectAll">全选/反选</label>
+
+</body>
+</html>
