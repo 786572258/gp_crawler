@@ -42,6 +42,9 @@
 <body>
 <div id="container" style="width: 100%; height: 90%"></div>
 <script>
+    // 访问路径：file:///C:/python_project/gp_crawler/myspider/myspider/5.html?days=12
+    // 入参: days： 取正常日的天数的范围
+    //      type： 为0时，将每个数据点的值与第一个数据点的值进行比较，并以百分比形式显示相对变化；为1时：计算当前点与前一个点的变化百分比
     var currentUrl = window.location.href;
 
     // 使用 URL 对象解析 URL
@@ -52,11 +55,16 @@
 
     // 获取特定参数的值
     var days = params.get('days');
+    var showtype = params.get('type');
 
     var seriesOptions = [];
 
     var chart = null
     var selectedPoint = null
+
+    if (!days) {
+        alert("缺少days")
+    }
     // create the chart when all data is loaded
     var createChart = function () {
         return Highcharts.stockChart('container', {
@@ -69,9 +77,10 @@
                     }
                 }
             },
+
             // 图例配置
             legend: {
-                enabled: true, // 设置为 true 以启用图例，默认为 true
+                enabled: false, // 设置为 true 以启用图例，默认为 true
                 align: 'center', // 图例的水平对齐方式：'left', 'center', 'right'
                 verticalAlign: 'top', // 图例的垂直对齐方式：'top', 'middle', 'bottom'
                 layout: 'horizontal', // 图例的布局方式：'horizontal'（水平）或 'vertical'（垂直）
@@ -116,8 +125,48 @@
             },
             plotOptions: {
                 series: {
-                    compare: 'percent'
-                }
+                    compare: showtype == 1 ? 'none' : "percent", //percent、none、value、percentchange
+                    point: {
+                        cursor: 'pointer',
+                        events: {
+                            click: function (event) {
+                                console.log("当前this.series", this.series)
+                                console.log("当前point", event.point)
+                                selectedPoint = event.point
+                                // var currentIndex = selectedPoint.index; // x轴的index
+                                // var currentPlotY = selectedPoint.plotY
+                                // // 获取左边点的索引
+                                // var leftIndex = currentIndex - 1;
+                                // var leftPoint = this.series.data[leftIndex];
+                                // console.log("左边point", leftPoint)
+                                //
+                                //
+                                // seriesOptionsLength = seriesOptions.length
+                                // var currColumns = [];
+                                // for (var i = 0; i < seriesOptionsLength; i++) {
+                                //     currColumns.push({"seriesIndex": i, "plotY": chart.series[i].data[currentIndex].plotY, "point": chart.series[i].points[currentIndex]});
+                                // }
+                                //
+                                // console.log("currColumns=", currColumns)
+                                // //
+                                // var sortedCurrColumns = currColumns.slice().sort((a, b) => parseFloat(a.plotY) - parseFloat(b.plotY));
+                                // console.log("sortedCurrColumns=", sortedCurrColumns)
+                                // var sortedCurrColumnsIndex = sortedCurrColumns.findIndex(item => item.plotY === currentPlotY);
+                                // var targetIndex = Math.min(sortedCurrColumnsIndex + 1, seriesOptionsLength - 1);
+                                // var targetPoint = sortedCurrColumns[targetIndex].point
+                                // console.log(targetPoint)
+                                // // 移动选中点
+                                // selectedPoint.select(false); // 取消当前点的选择
+                                // selectedPoint = targetPoint;
+                                // selectedPoint.select(); // 选中新的点x
+                                // chart.tooltip.refresh(targetPoint)
+                                // // var colNextSeriesIndex = sortedCurrColumns[nextIndex].seriesIndex
+
+                            }
+                        }
+                    }
+                },
+
             },
             tooltip: {
                 pointFormat: '<span style="color:{series.color}">{series.name}</span>: <b>{point.y}</b> ({point.change}%)<br/>',
@@ -146,9 +195,24 @@
         for(var name in data.data.industry_name_daily_data) {
             console.log(name)
             console.log(data.data.industry_name_daily_data[name])
+            var seriesdata = []
+            if (showtype == 1) {
+                 // 计算前后百分比变化
+                 seriesdata = data.data.industry_name_daily_data[name].map(function (point, index, array) {
+                    if (index === 0) {
+                        return [point[0], 0]; // 第一个点的变化为0
+                    } else {
+                        var previousValue = array[index - 1][1];
+                        var percentageChange = ((point[1] - previousValue) / previousValue) * 100;
+                        return [point[0], percentageChange];
+                    }
+                });
+            } else {
+                seriesdata = data.data.industry_name_daily_data[name]
+            }
             seriesOptions[i] = {
                 name: name + i,
-                data: data.data.industry_name_daily_data[name]
+                data: seriesdata
             };
             i++;
         }
@@ -179,51 +243,55 @@
 
     // 监听键盘事件
     document.addEventListener('keydown', function (event) {
+        console.log(chart.series)
+        var currentIndex = selectedPoint.index; // x轴的index
+        console.log("currentIndex==", currentIndex)
+        var currentPlotY = selectedPoint.plotY
+        var seriesOptionsLength = seriesOptions.length
+        var xLength = chart.series[0].data.length
+        console.log("xLength=", xLength)
+        var currColumns = [];
+        for (var i = 0; i < seriesOptionsLength; i++) {
+            currColumns.push({"seriesIndex": i, "plotY": chart.series[i].data[currentIndex].plotY, "point": chart.series[i].points[currentIndex]});
+        }
+        console.log("currColumns=", currColumns)
+        var sortedCurrColumns = currColumns.slice().sort((a, b) => parseFloat(a.plotY) - parseFloat(b.plotY));
+        console.log("sortedCurrColumns=", sortedCurrColumns)
+        var sortedCurrColumnsIndex = sortedCurrColumns.findIndex(item => item.plotY === currentPlotY);
+
+        var targetPoint = null
         switch (event.key) {
             case 'ArrowUp':
-                moveSelectedPoint('up');
+                var targetColumnIndex = Math.min(sortedCurrColumnsIndex - 1, xLength - 1);
+                targetPoint = sortedCurrColumns[targetColumnIndex].point
+                console.log(targetPoint)
                 break;
             case 'ArrowDown':
-                moveSelectedPoint('down');
+                var targetColumnIndex = Math.min(sortedCurrColumnsIndex + 1, xLength - 1);
+                targetPoint = sortedCurrColumns[targetColumnIndex].point
+                console.log(targetPoint)
                 break;
             case 'ArrowLeft':
-                moveSelectedPoint('left');
+                var targetXIndex = Math.max(currentIndex - 1, 0);
+                targetPoint = selectedPoint.series.data[targetXIndex]
+
+                console.log(targetPoint)
                 break;
             case 'ArrowRight':
-                moveSelectedPoint('right');
+                var targetXIndex = Math.min(currentIndex + 1, xLength - 1);
+                console.log("targetXIndex=", targetXIndex)
+                targetPoint = selectedPoint.series.data[targetXIndex]
+                console.log("目标targetpoint====", targetPoint)
                 break;
+        }
+        if (targetPoint) {
+            // 移动选中点
+            selectedPoint.select(false); // 取消当前点的选择
+            selectedPoint = targetPoint;
+            selectedPoint.select(); // 选中新的点x
+            chart.tooltip.refresh(selectedPoint)
         }
     });
-
-    // 移动选中的点
-    function moveSelectedPoint(direction) {
-        var currentIndex = selectedPoint.index;
-        var seriesData = chart.series[0].data;
-        var newIndex;
-
-        switch (direction) {
-            case 'up':
-                newIndex = currentIndex - 1;
-                break;
-            case 'down':
-                newIndex = currentIndex + 1;
-                break;
-            case 'left':
-                newIndex = currentIndex - 1;
-                break;
-            case 'right':
-                newIndex = currentIndex + 1;
-                break;
-        }
-
-        // 确保新索引在有效范围内
-        newIndex = Math.max(0, Math.min(seriesData.length - 1, newIndex));
-
-        // 移动选中点
-        selectedPoint.select(false); // 取消当前点的选择
-        selectedPoint = seriesData[newIndex];
-        selectedPoint.select(); // 选中新的点
-    }
 </script>
 <input type="checkbox" id="selectAll" onchange="toggleAllSeries()">
 <label for="selectAll">全选/反选</label>

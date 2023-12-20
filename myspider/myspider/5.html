@@ -47,24 +47,24 @@
         }
 
         // // 计算价格的百分比变化
-        // function calculatePercentageChanges(prices) {
-        //     var changes = [0];  // 第一个值为0，因为没有前一个值
-        //     for (var i = 1; i < prices.length; i++) {
-        //         var change = ((prices[i] - prices[i - 1]) / prices[i - 1]) * 100;
-        //         changes.push(change);
-        //     }
-        //     return changes;
-        // }
-
         function calculatePercentageChanges(prices) {
             var changes = [0];  // 第一个值为0，因为没有前一个值
-            var initialPrice = prices[0];
             for (var i = 1; i < prices.length; i++) {
-                var change = ((prices[i] - initialPrice) / initialPrice) * 100;
+                var change = ((prices[i] - prices[i - 1]) / prices[i - 1]) * 100;
                 changes.push(change);
             }
             return changes;
         }
+
+        // function calculatePercentageChanges(prices) {
+        //     var changes = [0];  // 第一个值为0，因为没有前一个值
+        //     var initialPrice = prices[0];
+        //     for (var i = 1; i < prices.length; i++) {
+        //         var change = ((prices[i] - initialPrice) / initialPrice) * 100;
+        //         changes.push(change);
+        //     }
+        //     return changes;
+        // }
         // var series = []
         var dateList = []
         var legendList = []

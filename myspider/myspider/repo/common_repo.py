@@ -30,6 +30,10 @@ class CommonRepo:
             formatted_date = ten_days_ago.strftime('%Y%m%d')
             where += " and date > %s"
             where_value.append(formatted_date)
+
+            where += " and name in %s"
+            where_value.append(['上证指数','黑色家电','饮料制造'])
+
         return db_utils.find(self.cursor, "industry_daily_data", (where, *where_value), 99999999)
     #
     # # 获取土地数据
