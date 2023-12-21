@@ -69,6 +69,15 @@
     var createChart = function () {
         return Highcharts.stockChart('container', {
             chart: {
+                /*
+                'line'：折线图
+                'column'：柱状图
+                'bar'：横向柱状图
+                'area'：面积图
+                'areaspline'：平滑面积图
+                'scatter'：散点图
+
+                */
                 type: 'line',
                 events: {
                     load: function () {
@@ -125,6 +134,36 @@
             },
             plotOptions: {
                 series: {
+                    dataLabels: {
+                        enabled: false,
+                        formatter: function() {
+                            console.log('Current Y value:', this);
+                            // 使用 Highcharts.numberFormat 格式化数值，保留两位小数
+                            if (showtype == 1) {
+                                return Highcharts.numberFormat(this.y, 2) + '%';
+                            } else {
+                                return Highcharts.numberFormat(this.point.change, 2) + '%';
+                            }
+                        }
+                    },
+                     events: {
+                        mouseOver: function () {
+                            // 当悬停时显示数据标签
+                            this.update({
+                                dataLabels: {
+                                    enabled: true
+                                }
+                            });
+                        },
+                        mouseOut: function () {
+                            // 当鼠标离开时隐藏数据标签
+                            this.update({
+                                dataLabels: {
+                                    enabled: false
+                                }
+                            });
+                        }
+                    },
                     compare: showtype == 1 ? 'none' : "percent", //percent、none、value、percentchange
                     point: {
                         cursor: 'pointer',
@@ -252,7 +291,7 @@
         console.log("xLength=", xLength)
         var currColumns = [];
         for (var i = 0; i < seriesOptionsLength; i++) {
-            currColumns.push({"seriesIndex": i, "plotY": chart.series[i].data[currentIndex].plotY, "point": chart.series[i].points[currentIndex]});
+            currColumns.push({"seriesIndex": i, "plotY": chart.series[i].data[currentIndex].plotY, "point": chart.series[i].data[currentIndex]});
         }
         console.log("currColumns=", currColumns)
         var sortedCurrColumns = currColumns.slice().sort((a, b) => parseFloat(a.plotY) - parseFloat(b.plotY));
@@ -262,7 +301,11 @@
         var targetPoint = null
         switch (event.key) {
             case 'ArrowUp':
+                // console.log("selectedPoint==", selectedPoint)
+                // return
                 var targetColumnIndex = Math.min(sortedCurrColumnsIndex - 1, xLength - 1);
+                // targetPoint = selectedPoint.series.data[targetXIndex]
+
                 targetPoint = sortedCurrColumns[targetColumnIndex].point
                 console.log(targetPoint)
                 break;
