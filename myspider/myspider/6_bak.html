@@ -8,38 +8,30 @@
 </head>
 <body style="margin: 0; padding: 0; height: 100vh; overflow: hidden;">
     <!-- ECharts 容器 -->
-    <div id="main" style="width: 100%; height: 94%;"></div>
+    <div id="main" style="width: 100%; height: 100%;"></div>
 
     <script>
-        var urlParams = getUrlParams()
-        var myChart = echarts.init(document.getElementById('main'), 'purple-passion',{renderer:'canvas'});
+        alert(1)
 
-        function getUrlParams() {
-             var currentUrl = window.location.href;
+         var myChart = echarts.init(document.getElementById('main'), 'purple-passion',{renderer:'canvas'});
 
-             // 使用 URL 对象解析 URL
-             var url = new URL(currentUrl);
-
-             // 使用 URLSearchParams 获取参数
-             var params = new URLSearchParams(url.search);
-             return params
-        }
-
-        // // 计算价格的涨跌百分比变化
+        // // 计算价格的百分比变化
         function calculatePercentageChanges_1(prices) {
             var changes = [0];  // 第一个值为0，因为没有前一个值
             for (var i = 1; i < prices.length; i++) {
                 var change = ((prices[i] - prices[i - 1]) / prices[i - 1]) * 100;
-                changes.push(change.toFixed(2));
+                changes.push(change);
             }
             return changes;
         }
 
         // 立基点价格涨跌百分比
         function calculatePercentageChanges(prices) {
+            var params = getUrlParams()
             // 获取特定参数的值
-            if (urlParams.get("type") == 1) {
-               return calculatePercentageChanges_1(prices)
+            var typeValue = params.get('type');
+            if typeValue == 1 {
+               return calculatePercentageChanges_1()
             } else {
                 var changes = [0];  // 第一个值为0，因为没有前一个值
                 var initialPrice = prices[0];
@@ -57,13 +49,14 @@
         var legendList = []
         var stockPriceList = []
 
-        params = getUrlParams()
+        // params = getUrlParams()
         // // 获取特定参数的值
-        var days = params.get('days');
+        // var days = params.get('days');
 
         var currSeriesIndex = 0
         var currDataIndex = 0
         var currSeriesName = ""
+        alert(1)
 
         fetch('http://127.0.0.1:5000/api/industry_daily_data?days='+days)
         .then(response => response.json())
@@ -85,7 +78,7 @@
             // 使用刚指定的配置项和数据显示图表。
             option = generateOption()
             myChart.setOption(option);
-            inverseSelection(); // 初始化一下
+
 
 
             //
@@ -231,9 +224,6 @@
             }
 
             myChart.dispatchAction({
-                    type: 'hideTip'
-                });
-            myChart.dispatchAction({
                 type: 'showTip',
                 // 屏幕上的 x 坐标
                 // x: 646,
@@ -247,7 +237,7 @@
             myChart.dispatchAction({
                type: 'highlight',
                seriesIndex: targetSeriesIndex,
-               dataIndex: targetDataIndex
+               dataIndex: dataIndex
             });
 
             currSeriesIndex = targetSeriesIndex
@@ -306,7 +296,7 @@
                 },
                 grid: {
                     left:'3%',
-                    right: "7%",
+                    right: "7%"
                 },
                 tooltip: {
                     show: true,
@@ -358,16 +348,9 @@
                 },
                 xAxis: {
                     type: 'category',
-                    data: dateList,
-                    splitLine: {
-                        show: true,  // 设置为 true 显示分隔线
-                        lineStyle: {
-                            color: 'rgba(0, 0, 0, 0.1)'  // 设置分隔线颜色
-                        }
-                    }
+                    data: dateList
                 },
                 yAxis: {
-                    
                     // type: 'value',
                     // name: '百分比变化 (%)'
                 },
@@ -415,7 +398,16 @@
             return option;
         }
 
-        
+        function getUrlParams() {
+            var currentUrl = window.location.href;
+
+            // 使用 URL 对象解析 URL
+            var url = new URL(currentUrl);
+
+            // 使用 URLSearchParams 获取参数
+            var params = new URLSearchParams(url.search);
+            return params
+        }
 
         function toggleLabels() {
             var option = myChart.getOption();
@@ -431,23 +423,10 @@
             var button = document.getElementById("toggleLabelsButton");
             // 更新按钮文本内容
             button.textContent = option.series[0].label.show ? "关闭标签" : "开启标签";
-        } 
-
-        function inverseSelection() {
-            var selected = {};
-            var legendData =myChart.getOption().legend[0].data;
-            legendData.forEach(function (name) {
-                selected[name] = !myChart.getOption().legend[0].selected[name];
-            });
-            console.log("selected=", selected);
-            myChart.setOption({
-                legend: { selected: selected }
-            });
         }
     </script>
 
     <button id="toggleLabelsButton" onclick="toggleLabels()">关闭标签</button>
-    <button id="" onclick="inverseSelection()">反选</button>
 
 </body>
 

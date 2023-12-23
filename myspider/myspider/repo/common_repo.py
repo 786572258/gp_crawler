@@ -9,7 +9,7 @@ class CommonRepo:
 
     def __init__(self):
         mysql_conn = pymysql.connect(
-            host="127.0.0.1", port=3306,
+            host="localhost", port=8889,
             user='root', password='root',
             database='gp', charset='utf8mb4', cursorclass=pymysql.cursors.DictCursor,
             autocommit=True,
@@ -30,6 +30,11 @@ class CommonRepo:
             formatted_date = ten_days_ago.strftime('%Y%m%d')
             where += " and date > %s"
             where_value.append(formatted_date)
+
+            where += " and (name = %s or name = %s)"
+            where_value.append("互联网电商")
+            where_value.append("上证指数")
+
         return db_utils.find(self.cursor, "industry_daily_data", (where, *where_value), 99999999)
     #
     # # 获取土地数据
