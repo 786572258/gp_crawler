@@ -1,10 +1,8 @@
 from datetime import datetime, timedelta
 
 import pymysql
-import sys
 
-sys.path.append('/Users/mac/python_project/gp_crawler/myspider/')
-from myspider.utils import db_utils
+from utils import db_utils
 
 
 class CommonRepo:
@@ -33,9 +31,9 @@ class CommonRepo:
             where += " and date > %s"
             where_value.append(formatted_date)
 
-            # where += " and (name = %s or name = %s)"
-            # where_value.append("互联网电商")
-            # where_value.append("上证指数")
+            where += " and (name = %s or name = %s)"
+            where_value.append("互联网电商")
+            where_value.append("上证指数")
 
         return db_utils.find(self.cursor, "industry_daily_data", (where, *where_value), 99999999)
     #

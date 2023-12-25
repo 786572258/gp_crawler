@@ -1,0 +1,660 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="utf-8">
+    <link rel="icon" href="https://jscdn.com.cn/highcharts/images/favicon.ico">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        /* css 代码  */
+    </style>
+    <script src="https://img.hcharts.cn/jquery/jquery-1.8.3.min.js"></script>
+    <script src="./highstock.js"></script>
+    <script src="./exporting.js"></script>
+    <script src="./zh_cn-1.4.0.min.js"></script>
+</head>
+<style>
+    body {
+        padding: 0;
+        margin: 0;
+    }
+    html,body{
+        height: 100%;
+        width: 100%;
+    }
+    html{
+        height: 100%;
+        width: 100%;
+    }
+
+    /*#container{*/
+    /*    position: fixed;*/
+    /*    width: 1px;*/
+    /*    height: 400px;*/
+    /*    margin: auto;*/
+    /*    background-color: white;*/
+    /*    top: 0;*/
+    /*    left: 0;*/
+    /*    right: 0;*/
+    /*    bottom: 0;*/
+    /*}*/
+</style>
+
+<body>
+<div id="container" style="width: 95%; height: 90%"></div>
+<script>
+    // 访问路径：file:///C:/python_project/gp_crawler/myspider/myspider/5.html?days=12
+    // 入参: days： 取正常日的天数的范围
+    //      type： 为0时，将每个数据点的值与第一个数据点的值进行比较，并以百分比形式显示相对变化；为1时：计算当前点与前一个点的变化百分比
+    var currentUrl = window.location.href;
+
+    // 使用 URL 对象解析 URL
+    var url = new URL(currentUrl);
+
+    // 使用 URLSearchParams 获取参数
+    var params = new URLSearchParams(url.search);
+
+    // 获取特定参数的值
+    var days = params.get('days');
+    var showtype = params.get('type');
+
+    var seriesOptions = [];
+
+    var chart = null
+
+    var selectedSeriesIndex = 0
+    var selectedSeriesDataIndex = 0
+    var selectedSeriesPlotY = 0
+    if (!days) {
+        alert("缺少days")
+    }
+    // create the chart when all data is loaded
+    var createChart = function () {
+        return Highcharts.stockChart('container', {
+            chart: {
+                // spacingBottom: -66, // 调整底部空间
+                   // spacingTop: 10,     // 调整顶部空间
+                // rangeSelector: {
+                //         inputBoxHeight: 10 // 设置范围选择器输入框的高度为30像素，你可以根据需要调整这个值
+                //     },
+                /*
+                'line'：折线图
+                'column'：柱状图
+                'bar'：横向柱状图
+                'area'：面积图
+                'areaspline'：平滑面积图
+                'scatter'：散点图
+
+                */
+                type: 'line',
+                events: {
+                    load: function () {
+                        // 在图表加载后，将焦点设置在第一个点上
+//                        this.series[7].points[5].select();
+                        // 获取第5个系列的第一个点的坐标
+                        // 获取第5个系列的第一个点
+                        var seriesIndexToHighlight = 4;
+                        var pointIndexToHighlight = 0;
+//                         this.series[9].setState('hover');
+
+                    }
+
+                }
+            },
+            navigator: {
+                // enabled: false
+            },
+
+            // 图例配置
+            legend: { 
+                enabled: true, // 设置为 true 以启用图例，默认为 true
+                align: 'center', // 图例的水平对齐方式：'left', 'center', 'right'
+                verticalAlign: 'top', // 图例的垂直对齐方式：'top', 'middle', 'bottom'
+                layout: 'horizontal', // 图例的布局方式：'horizontal'（水平）或 'vertical'（垂直）
+                width:'100%',
+                borderWidth: 1, // 图例边框的宽度
+                borderRadius: 5, // 图例边框的圆角半径
+                borderColor: '#ccc', // 图例边框的颜色
+                itemStyle: {
+                    color: '#333' // 图例项的文本颜色
+                },
+                maxHeight: 80, // 设置图例的最大高度
+                symbolHeight: 15, // 设置图例项的高度
+                navigation: {
+                    enabled: true, // 启用滚动条
+                    animation: true
+                
+                },
+                itemHoverStyle: {
+                    color: '#000' // 图例项的悬停时文本颜色
+                },
+                // labelFormatter: function () {
+                //     return this.name + ' <span class="toggle" onclick="toggleSeries(\'' + this.name + '\')">Toggle</span>';
+                // }
+                itemEvents: {
+                    legendItemClick: function () {
+                        var series = this.chart.series;
+                        var index = this.index;
+                        var isVisible = series[index].visible;
+
+                        series.forEach(function (s) {
+                            s.setVisible(!isVisible, false);
+                        });
+                    }
+                }
+            },
+            rangeSelector: {
+                selected: 4
+            },
+            xAxis: {
+                crosshair: {
+                    label: {
+                        enabled: true
+                    }
+                },
+                // type: 'linear'
+
+              // type: 'category',
+              // ordinal: false,
+ //              tickInterval: 70, // 每隔7个单位显示一个标签
+ // min: Date.UTC(2020, 0, 1), // 设置最小日期
+ //    max: Date.UTC(2023, 11, 31) // 设置最大日期
+              // 其他配置...
+            },
+            yAxis: {
+                crosshair: {
+                    label: {
+                        enabled: false
+                    }
+                },
+                labels: {
+                    formatter: function () {
+                        return (this.value > 0 ? ' + ' : '') + this.value + '%';
+                    }
+                },
+                plotLines: [{
+                    value: 0,
+                    width: 2,
+                    color: 'silver'
+                }]
+            },
+            plotOptions: {
+                series: {
+//                    opacity: 0.2, // 默认透明度
+
+                    states: {
+                       hover: {
+                           enabled: true,
+                           lineWidth: 3
+                       },
+                        // select: {
+                        //     enabled: true,
+                        //     lineWidth: 7,
+                        //     lineWidthPlus:6
+                        // }
+                    },
+                    dataLabels: {
+                        enabled: false,
+                        formatter: function() {
+//                            console.log('Current Y value:', this);
+                            // 使用 Highcharts.numberFormat 格式化数值，保留两位小数
+                            if (showtype == 1) {
+                                return Highcharts.numberFormat(this.y, 2) + '%';
+                            } else {
+                                return Highcharts.numberFormat(this.point.change, 2) + '%';
+                            }
+                        }
+                    },
+                    events: {
+//                        mouseOver: function () {
+//                            console.log(this)
+// //                            // 当悬停时显示数据标签
+//                            this.update({
+//                                dataLabels: {
+//                                    enabled: true
+//                                }
+//                            });
+//                        },
+//                        mouseOut: function () {
+//                            console.log(this)
+
+// //                            // 当鼠标离开时隐藏数据标签
+//                            this.update({
+//                                dataLabels: {
+//                                    enabled: false
+//                                }
+//                            });
+//                        }
+                   },
+                    compare: showtype == 1 ? 'none' : "percent", //percent、none、value、percentchange
+                    point: {
+//                        cursor: 'pointer',
+                        events: {
+//                              mouseOver: function () {
+//                                  index = this.series.index
+// //                                  for (var i = 0; i < chart.series.length - 2 ; i++) {
+// //                                      chart.series[i].update({
+// //                                        opacity: 0.1
+// //                                      });
+// //                                  }
+//                                  console.log('来了', this, index)
+//                                // 鼠标悬浮时将透明度设置为1，显示折线
+// //                                   chart.series[this.series.index]./
+//                                chart.series[index].update({
+//                                  dataLabels: {
+//                                    enabled: true
+//                                }
+//                                });
+
+//                            },
+//                            mouseOut: function () {
+//                               index = this.series.index
+
+//                               chart.series[index].update({
+//                                  dataLabels: {
+//                                    enabled: false
+//                                }
+//                                });
+//                            },
+                            click: function (event) {
+                                console.log("当前this.series", this.series)
+                                console.log("当前point", event.point, "event.point.index(dataIndex)==", event.point.index, "event.point.series.index==", event.point.series.index)
+//                                for (var i = 0; i < chart.series.length -1 ; i++) {
+//                                    chart.series[i].update({
+//                                        dataLabels: {
+//                                            enabled: true // 或者 true，根据你的需求设定
+//                                        }
+//                                    });
+//                                }
+                                var oldIndex = selectedSeriesIndex
+                                selectedSeriesIndex = event.point.series.index
+                                selectedSeriesDataIndex = event.point.index
+                                selectedSeriesPlotY = event.point.plotY
+                                
+                                chart.series[oldIndex].update({
+                                    dataLabels: {
+                                        enabled: false,
+
+                                    },
+                                    opacity: 0.1,
+                                    lineWidth: 1
+                                });
+
+                                // var selectedPoint = chart.series[selectedSeriesIndex][event.point.series.index]
+                                console.log("click selectedSeriesIndex===", selectedSeriesIndex)
+                                chart.series[selectedSeriesIndex].update({
+                                    dataLabels: {
+                                        enabled: true
+                                    },
+                                    lineWidth: 3,
+                                    opacity: 1
+
+                                });
+                                console.log("click selectedSeriesIndex after ===", selectedSeriesIndex)
+                                console.log("click selectedSeriesDataIndex after ===", selectedSeriesDataIndex)
+                                // chart.series[selectedSeriesIndex].data[selectedSeriesDataIndex].select();
+
+//                                selectedPoint.series.options.dataLabels.enabled = true
+                                // var currentIndex = selectedPoint.index; // x轴的index
+                                // var currentPlotY = selectedPoint.plotY
+                                // // 获取左边点的索引
+                                // var leftIndex = currentIndex - 1;
+                                // var leftPoint = this.series.data[leftIndex];
+                                // console.log("左边point", leftPoint)
+                                //
+                                //
+                                // seriesOptionsLength = seriesOptions.length
+                                // var currColumns = [];
+                                // for (var i = 0; i < seriesOptionsLength; i++) {
+                                //     currColumns.push({"seriesIndex": i, "plotY": chart.series[i].data[currentIndex].plotY, "point": chart.series[i].points[currentIndex]});
+                                // }
+                                //
+                                // console.log("currColumns=", currColumns)
+                                // //
+                                // var sortedCurrColumns = currColumns.slice().sort((a, b) => parseFloat(a.plotY) - parseFloat(b.plotY));
+                                // console.log("sortedCurrColumns=", sortedCurrColumns)
+                                // var sortedCurrColumnsIndex = sortedCurrColumns.findIndex(item => item.plotY === currentPlotY);
+                                // var targetIndex = Math.min(sortedCurrColumnsIndex + 1, seriesOptionsLength - 1);
+                                // var targetPoint = sortedCurrColumns[targetIndex].point
+                                // console.log(targetPoint)
+                                // // 移动选中点
+                                // selectedPoint.select(false); // 取消当前点的选择
+                                // selectedPoint = targetPoint;
+                                // selectedPoint.select(); // 选中新的点x
+                                // chart.tooltip.refresh(targetPoint)
+                                // // var colNextSeriesIndex = sortedCurrColumns[nextIndex].seriesIndex
+
+                            }
+                        }
+                    }
+                },
+
+            },
+            tooltip: {
+                shared: false, // 共享提示框
+
+                pointFormat: '<span style="color:{series.color}">{series.name}</span>: <b>{point.y}</b> ({point.change}%)<br/>',
+                valueDecimals: 2
+            },
+            series: seriesOptions
+        });
+    };
+
+    // console.log(name + "===", data)
+    // var data = {
+    //     "data": {
+    //         "industry_name_daily_data": {
+    //             'A': [111, 116, 134, 120, 121],
+    //             'B': [124, 111, 134, 125, 121],
+    //             'C': [0, 0, 0, 120, 110, 110],
+    //         },
+    //         "date_list":[20230101, 20230102, 20230103, 20230104, 20230105, ]
+    //     }
+    // }
+
+
+    $.getJSON('http://127.0.0.1:5000/api/industry_daily_data_v2?days='+days, function (data) {
+        console.log(data)
+        var i = 0;
+        for(var name in data.data.industry_name_daily_data) {
+//            console.log(name)
+//            console.log(data.data.industry_name_daily_data[name])
+            var seriesdata = []
+            if (showtype == 1) {
+                 // 计算前后百分比变化
+                 seriesdata = data.data.industry_name_daily_data[name].map(function (point, index, array) {
+                    if (index === 0) {
+                        return [point[0], 0]; // 第一个点的变化为0
+                    } else {
+                        var previousValue = array[index - 1][1];
+                        var percentageChange = ((point[1] - previousValue) / previousValue) * 100;
+                        return [point[0], percentageChange];
+                    }
+                });
+            } else {
+                seriesdata = data.data.industry_name_daily_data[name]
+            }
+            seriesOptions[i] = {
+                name: name + i,
+                data: seriesdata
+            };
+            i++;
+        }
+        chart = createChart();
+        Highcharts.setOptions({
+            global: {
+                useUTC: false
+            }
+        })
+//        chart.options.plotOptions.pie.enableMouseTracking = false;
+
+    });
+
+
+    // $.each(names, function (i, name) {
+    //     $.getJSON('https://data.jianshukeji.com/jsonp?filename=json/' + name.toLowerCase() + '-c.json&callback=?', function (data) {
+    //
+    //     });
+    // });
+    function toggleAllSeries() {
+//        console.log(chart)
+        var series = chart.series;
+        var allVisible = series.every(function (s) {
+            return s.visible;
+        });
+
+        series.forEach(function (s) {
+            s.setVisible(!allVisible, false);
+        });
+    }
+
+    // 监听键盘事件
+    document.addEventListener('keydown', function (event) {
+        console.log("selectedSeriesIndex==========", selectedSeriesIndex)
+        console.log("selectedSeriesDataIndex==========", selectedSeriesDataIndex)
+        console.log("selectedSeriesPlotY==========", selectedSeriesPlotY)
+        var seriesOptionsLength = seriesOptions.length
+        console.log("seriesOptionsLength===", seriesOptionsLength)
+        var xLength = chart.series[0].data.length
+        console.log("xLength=", xLength)
+        var currColumns = [];
+        for (var i = 0; i < seriesOptionsLength; i++) {
+            currColumns.push({"seriesIndex": i, "plotY": chart.series[i].data[selectedSeriesDataIndex].plotY, "point": chart.series[i].data[selectedSeriesDataIndex]});
+        }
+        var sortedCurrColumns = currColumns.slice().sort((a, b) => parseFloat(a.plotY) - parseFloat(b.plotY));
+        var sortedCurrColumnsIndex = sortedCurrColumns.findIndex(item => item.plotY === selectedSeriesPlotY);
+        // 目标节点
+        var isMove = false
+        var targetSeriesIndex = 0
+        var targetSeriesDataIndex = 0
+        switch (event.key) {
+            case 'ArrowUp':
+                isMove = true
+                if (sortedCurrColumnsIndex - 1 < 0) {
+                    var targetColumnIndex = seriesOptionsLength - 1;
+                } else {
+                    var targetColumnIndex = Math.max(sortedCurrColumnsIndex - 1, 0);
+                }
+
+                console.log("ArrowUp targetColumnIndex======",targetColumnIndex);
+                var targetPoint = sortedCurrColumns[targetColumnIndex].point
+                console.log("ArrowUp targetPoint=======", targetPoint)
+                targetSeriesIndex = targetPoint.series.index
+                targetSeriesDataIndex = targetPoint.index
+                break;
+            case 'ArrowDown':
+                isMove = true
+                if (sortedCurrColumnsIndex + 1 > seriesOptionsLength - 1) {
+                    var targetColumnIndex = 0;
+                } else {
+                    var targetColumnIndex = Math.min(sortedCurrColumnsIndex + 1, seriesOptionsLength - 1);
+                }
+
+                if (!sortedCurrColumns[targetColumnIndex]) {
+                    return
+                }
+                var targetPoint = sortedCurrColumns[targetColumnIndex].point
+                console.log("targetPoint=======", targetPoint)
+                targetSeriesIndex = targetPoint.series.index
+                targetSeriesDataIndex = targetPoint.index
+                break;
+            case 'ArrowLeft':
+                isMove = true
+                var targetXIndex = Math.max(selectedSeriesDataIndex - 1, 0);
+                targetSeriesIndex = selectedSeriesIndex
+                targetSeriesDataIndex = targetXIndex
+                break;
+            case 'ArrowRight':
+                isMove = true
+                var targetXIndex = Math.min(selectedSeriesDataIndex + 1, xLength - 1);
+                console.log("targetXIndex=", targetXIndex)
+                targetSeriesIndex = selectedSeriesIndex
+                targetSeriesDataIndex = targetXIndex
+                console.log("ArrowRight targetSeriesIndex=======", targetSeriesIndex)
+                console.log("ArrowRight targetSeriesDataIndex=======", targetSeriesDataIndex)
+
+                break;
+        }
+        if (isMove) {
+            // 移动选中点
+            // 注意，尽量不要用targetPoint变量来取值，会被刷新，要用坐标取
+            console.log("targetSeriesIndex===", targetSeriesIndex)
+            console.log("targetSeriesDataIndex===", targetSeriesDataIndex)
+            // 设置老的坐标系列低亮
+            chart.series[selectedSeriesIndex].update({
+                dataLabels: {
+                    enabled: false
+                },
+                opacity:0.2,
+                lineWidth:1
+            })
+            // 设置新的坐标系列高亮
+            chart.series[targetSeriesIndex].update({
+                dataLabels: {
+                    enabled: true
+                },
+                opacity:1,
+                lineWidth:3
+            })
+            // 取消当前折线的选中
+            chart.series[selectedSeriesIndex].data[selectedSeriesDataIndex].select(false);
+            // 选中移动后的折线
+            chart.series[targetSeriesIndex].data[targetSeriesDataIndex].select();
+            
+            // 全局变量写入移动后的点位置信息
+            var targetPoint = chart.series[targetSeriesIndex].data[targetSeriesDataIndex];
+            selectedSeriesIndex = targetPoint.series.index
+            selectedSeriesDataIndex = targetPoint.index
+            selectedSeriesPlotY = targetPoint.plotY
+            // 刷新提示框
+            chart.tooltip.refresh(targetPoint)
+        }
+    });
+
+//     // 监听键盘事件
+//     document.addEventListener('keydown', function (event) {
+//         console.log("selectedPoint==========", selectedPoint)
+//         console.log("selectedSeriesIndex==========", selectedSeriesIndex)
+//         console.log("selectedSeriesDataIndex==========", selectedSeriesDataIndex)
+
+//         var currentIndex = selectedPoint.index; // x轴的index
+//         console.log("currentIndex==", currentIndex)
+//         var currentPlotY = selectedPoint.plotY
+//         var seriesOptionsLength = seriesOptions.length
+//         console.log("seriesOptionsLength===", seriesOptionsLength )
+//         var xLength = chart.series[0].data.length
+//         console.log("xLength=", xLength)
+//         var currColumns = [];
+//         for (var i = 0; i < seriesOptionsLength - 1; i++) {
+//             currColumns.push({"seriesIndex": i, "plotY": chart.series[i].data[currentIndex].plotY, "point": chart.series[i].data[currentIndex]});
+//         }
+//         console.log("currColumns=", currColumns)
+//         var sortedCurrColumns = currColumns.slice().sort((a, b) => parseFloat(a.plotY) - parseFloat(b.plotY));
+//         console.log("sortedCurrColumns=", sortedCurrColumns)
+//         var sortedCurrColumnsIndex = sortedCurrColumns.findIndex(item => item.plotY === currentPlotY);
+
+//         var targetPoint = null
+
+//         var targetSeriesIndex = 0
+//         var targetSeriesDataIndex = 0
+//         switch (event.key) {
+//             case 'ArrowUp':
+//                 // console.log("selectedPoint==", selectedPoint)
+//                 // return
+//                 var targetColumnIndex = Math.max(sortedCurrColumnsIndex - 1, 0);
+//                 console.log("targetColumnIndex======",targetColumnIndex)
+//                 // targetPoint = selectedPoint.series.data[targetXIndex]
+
+//                 targetPoint = sortedCurrColumns[targetColumnIndex].point
+//                  console.log("targetPoint=======", targetPoint)
+//                 targetSeriesIndex = targetPoint.series.index
+//                 targetSeriesDataIndex = targetPoint.index
+
+//                 break;
+//             case 'ArrowDown':
+//                 var targetColumnIndex = Math.min(sortedCurrColumnsIndex + 1, seriesOptionsLength - 1);
+
+//                 if (!sortedCurrColumns[targetColumnIndex]) {
+//                     return
+//                 }
+//                 targetPoint = sortedCurrColumns[targetColumnIndex].point
+//                 console.log("targetPoint=======", targetPoint)
+//                 targetSeriesIndex = targetPoint.series.index
+//                 targetSeriesDataIndex = targetPoint.index
+
+//                 console.log(targetPoint)
+//                 break;
+//             case 'ArrowLeft':
+//                 var targetXIndex = Math.max(currentIndex - 1, 0);
+//                 targetPoint = selectedPoint.series.data[targetXIndex]
+//                 console.log("targetPoint=======", targetPoint)
+//                 targetSeriesIndex = targetPoint.series.index
+//                 targetSeriesDataIndex = targetPoint.index
+//                 break;
+//             case 'ArrowRight':
+//                 var targetXIndex = Math.min(currentIndex + 1, xLength - 1);
+//                 console.log("targetXIndex=", targetXIndex)
+//                 targetPoint = selectedPoint.series.data[targetXIndex]
+//                 console.log("targetPoint=======", targetPoint)
+//                 targetSeriesIndex = targetPoint.series.index
+//                 targetSeriesDataIndex = targetPoint.index
+//                 break;
+//         }
+//         if (targetPoint) {
+//             // 移动选中点
+
+// //            selectedPoint.select(false); // 取消当前点的选择
+// //            selectedPoint = targetPoint;
+
+// //            selectedPoint.select(); // 选中新的点x
+// //            selectedPoint.series
+// //            chart.series[2].select();
+// //            chart.redraw();
+// //                        chart.series[3].setVisible(false);
+
+// //            chart.tooltip.refresh(selectedPoint)
+// //             // 重置所有系列的状态
+// //                for (var i = 0; i < chart.series.length; i++) {
+// //                    var series = chart.series[i];
+// //                    series.setState('select');
+// //                }
+//             // 设置点击的系列为选中状态
+
+// //            selectedPoint.series.states.hover.enabled = false
+// //             for (var i = 0; i < seriesOptionsLength; i++) {
+// //                var series = chart.series[i];
+// //                series.select(false);
+// //
+// //
+// //
+// //             }
+// //                        selectedPoint.series.select(false); // 选中新的点x
+// //                        selectedPoint.update(); // 选中新的点x
+
+
+//             chart.series[targetSeriesIndex].update(
+//                 {
+//                     dataLabels: {
+//                         enabled: true
+//                     }
+//                 }
+//             )
+// //
+//             console.log("selectedPoint+++++++++++++++", selectedPoint)
+//             var old_index = selectedPoint.series.index
+
+
+
+
+//             console.log("targetSeriesIndex===", targetSeriesIndex)
+//             console.log("targetSeriesDataIndex===", targetSeriesDataIndex)
+// //            selectedPoint.select(false)
+//             selectedPoint = chart.series[targetSeriesIndex].data[targetSeriesDataIndex];
+
+//             selectedPoint.select(false); // 选中新的点x
+//             chart.series[targetSeriesIndex].data[targetSeriesDataIndex].select();
+// //            selectedPoint.setState('select');
+
+
+//             chart.tooltip.refresh(selectedPoint)
+//              chart.series[old_index].update(
+//                 {
+//                     dataLabels: {
+//                         enabled: false
+//                     }
+//                 }
+//             )
+
+// //              chart.series[1].highlight(true);
+
+// //            selectedPoint.setState('select');
+// //              刷新图表
+// //                chart.redraw();
+
+//         }
+//     });
+</script>
+<input type="checkbox" id="selectAll" onchange="toggleAllSeries()">
+<label for="selectAll">全选/反选</label>
+
+</body>
+</html>

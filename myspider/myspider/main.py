@@ -92,6 +92,86 @@ def get_industry_daily_data():
 
     return jsonify({'data': converted_data})
 
+
+# 获取所有数据v2  highcharts
+@app.route('/api/industry_daily_data_v2', methods=['GET'])
+def get_industry_daily_data_v2():
+
+    days = request.args.get('days')
+    print(days)
+
+    common_repo = CommonRepo()
+    all_industry_daily_data = common_repo.find_industry_daily_data(days)
+    # 转换后的数据结构
+    converted_data = {
+        "industry_name_daily_data": defaultdict(list),
+        "date_list": []
+    }
+
+    # 遍历原始数据
+    industry_name_list = []
+    for item in all_industry_daily_data:
+        # 获取行业名称
+        industry_name = item['name']
+        # 解析日期字符串
+        date = item['date']
+        # date_object = datetime.strptime(date_str, '%Y%m%d')
+        # formatted_date_str = date_object.strftime('%Y-%m-%d')
+
+        # 将日期数字加入到日期列表中
+        if date not in converted_data["date_list"]:
+            converted_data["date_list"].append(date)
+
+        if industry_name not in industry_name_list:
+            industry_name_list.append(industry_name)
+
+        #
+        # # 将数据添加到对应的行业数据列表中
+        # converted_data["industry_name_daily_data"][industry_name].append(item['fluctuation_range'])
+
+    # 转换日期列表为有序的日期字符串列表
+    converted_data["date_list"] = sorted(converted_data["date_list"])
+
+    # 将原始数据转换为字典，以便更快地进行检索
+    data_dict = {(item['date'], item['name']): item['closing_price'] for item in all_industry_daily_data}
+
+    # 遍历日期和行业名称
+    for date in converted_data["date_list"]:
+        for industry_name in industry_name_list:
+            key = (date, industry_name)
+            closing_price = data_dict.get(key, 0)
+            # 格式 [1147651200000,23.15],  [1147737600000,23.01],
+            unixtimestamp = date_to_timestamp(str(date))
+
+            # textvar = f"jQuery18308469417668870118_1702892131214(/* MSFT historical OHLC data from the Google Finance API */[{unixtimestamp}])"
+            # if converted_data['industry_name_daily_data'][industry_name]:
+            #     converted_data['industry_name_daily_data'][industry_name] = f"{converted_data['industry_name_daily_data'][industry_name]},[{unixtimestamp}, {int(closing_price)}]"
+            # else:
+            #     converted_data['industry_name_daily_data'][industry_name] = f"[{unixtimestamp}, {int(closing_price)}]"
+
+            converted_data['industry_name_daily_data'][industry_name].append([unixtimestamp, float(closing_price)])
+
+
+    # for name in converted_data['industry_name_daily_data']:
+        # converted_data['industry_name_daily_data'][name] = f"[{converted_data['industry_name_daily_data'][name]}]"
+
+    # 打印转换后的数据
+    print(converted_data)
+
+    return jsonify({'data': converted_data})
+
+def date_to_timestamp(date_str):
+    # 将日期字符串转换为 datetime 对象
+    date_object = datetime.strptime(date_str, '%Y%m%d')
+
+    # 计算时间戳（秒级）
+    timestamp_seconds = int(date_object.timestamp())
+
+    # 转换为毫秒级时间戳
+    timestamp_milliseconds = timestamp_seconds * 1000
+
+    return timestamp_milliseconds
+
 # 获取特定ID的数据
 @app.route('/api/items/<int:item_id>', methods=['GET'])
 def get_item(item_id):

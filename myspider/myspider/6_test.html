@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>ECharts 百分比变化对比</title>
+    <!-- 引入 ECharts 库 -->
+    <script src="./echarts.min.js"></script>
+</head>
+<body>
+    <!-- ECharts 容器 -->
+    <div id="main" style="width: 1200px; height: 600px;"></div>
+
+    <script>
+         var myChart = echarts.init(document.getElementById('main'));
+
+        // 随机生成测试数据
+        function generateRandomStockData(days) {
+            var data = [];
+            var price = 100; // 初始价格
+            for (var i = 0; i < days; i++) {
+                price += Math.random() * 10 - 5; // 在前一天的基础上随机波动
+                data.push(price.toFixed(2));
+            }
+            return data;
+        }
+
+        function generateDateList() {
+
+        }
+
+        // 生成测试名称数组
+        function generateStockNames(count) {
+            var names = [];
+            for (var i = 1; i <= count; i++) {
+                names.push('测试' + i);
+            }
+            return names;
+        }
+
+        // 生成测试价格数组
+        function generateStockPrices(count, days) {
+            var prices = [];
+            for (var i = 0; i < count; i++) {
+                prices.push(generateRandomStockData(days));
+            }
+            return prices;
+        }
+
+        // // 计算价格的百分比变化
+        // function calculatePercentageChanges(prices) {
+        //     var changes = [0];  // 第一个值为0，因为没有前一个值
+        //     for (var i = 1; i < prices.length; i++) {
+        //         var change = ((prices[i] - prices[i - 1]) / prices[i - 1]) * 100;
+        //         changes.push(change);
+        //     }
+        //     return changes;
+        // }
+
+        function calculatePercentageChanges(prices) {
+            var changes = [0];  // 第一个值为0，因为没有前一个值
+            var initialPrice = prices[0] // 有可能前几个都是0
+            var indexAfterZero = 0
+            if (prices[0] == 0) {
+                const indexOfZero = prices.indexOf(0);
+                if (indexOfZero !== -1) {
+                    indexAfterZero = indexOfZero + 1;
+
+                    while (indexAfterZero < prices.length && prices[indexAfterZero] === 0) {
+                        indexAfterZero++;
+                    }
+
+                    if (indexAfterZero < prices.length) {
+                        // console.log("首次出现非零数字的索引:", indexAfterZero);
+                        initialPrice = prices[indexAfterZero]
+                    } else {
+                        console.log("数组中没有非零数字");
+                    }
+                } else {
+                    console.log("数组中没有 0");
+                }
+            }
+
+            var change = 0
+            for (var i = 1; i < prices.length; i++) {
+                if (i <= indexAfterZero) {
+                    change = 0
+                } else {
+                    change = ((prices[i] - initialPrice) / initialPrice) * 100;
+                }
+                changes.push(change);
+            }
+            return changes;
+        }
+        // var series = []
+        var dateList = []
+        var legendList = []
+        var stockPriceList = []
+        var currentUrl = window.location.href;
+
+        // 使用 URL 对象解析 URL
+        var url = new URL(currentUrl);
+
+        // 使用 URLSearchParams 获取参数
+        var params = new URLSearchParams(url.search);
+
+        // 获取特定参数的值
+        var days = params.get('days');
+
+
+        // console.log(data); // 在这里处理获取到的 JSON 数据
+        stockData = {
+            'A': [111, 116, 134, 120, 121],
+            'B': [124, 111, 134, 125, 121],
+            'C': [0, 0, 0, 120, 110],
+        };
+        dateList = [20230101, 20230102, 20230103, 20230104, 20230105, ];
+        var index = 0
+        for (var key in stockData) {
+            index += 1
+            legendList.push(`${key}${index}`)
+            stockPriceList.push(stockData[key])
+        }
+        console.log("dateList=====", dateList);
+        console.log("legendList=====", legendList);
+        console.log("stockPriceList=====", stockPriceList);
+        // console.log(legendList);
+        // 使用刚指定的配置项和数据显示图表。
+        option = generateOption()
+        myChart.setOption(option);
+
+        // 注册点击事件
+        // myChart.on('click', function (params) {
+        //     console.log(params)
+        //     // 触发显示提示框的行为
+        //     myChart.dispatchAction({
+        //         type: 'showTip',
+        //         seriesIndex: 0, // 你的折线图可能有多个系列，选择相应的系列
+        //         dataIndex: params.dataIndex // 数据索引
+        //     });
+        // });
+
+        // myChart.on('mouseover', 'series.line', function(params) {
+        //     console.log(params)
+        //
+        // });
+
+                    // 注册点击事件
+        myChart.on('click', function (params) {
+            console.log(params)
+            // 更新配置，将点击的系列设置为高亮状态
+            var newOption = {
+                series: [{
+                    emphasis: {
+                        focus: 'series', // 高亮整个系列
+                        blurScope: 'coordinateSystem' // 高亮仍然保持，直到鼠标离开坐标系
+                    }
+                }]
+            };
+
+            // 使用 setOption 方法更新配置
+            myChart.setOption(newOption);
+
+        });
+
+        function generateOption() {
+            // ECharts 图表配置
+            var option = {
+                title: {
+                    text: '测试百分比变化对比'
+                },
+
+                tooltip: {
+                    show: true,
+                    trigger: 'item',
+                    axisPointer: {
+                        type: 'cross',
+                        snap: true,
+                        label: {
+                            backgroundColor: '#6a7985'
+                        },
+                        z: 100 // 设置较大的 z 值确保 tooltip 处于较高层级
+                    },
+                    position: 'bottom', // 将 tooltip 显示在底部
+                    formatter: function (param) {
+                        // console.log(param)
+                        var result = param.name + '<br/>'; // 显示横轴坐标
+
+                        // 只显示当前悬浮的测试信息
+                        var item = param
+                        var seriesName = item.seriesName;
+                        var dataIndex = item.dataIndex;
+                        var stockPrice = stockPriceList[legendList.indexOf(seriesName)];
+
+                        result += seriesName + ': ' + item.value.toFixed(2) + '%，价: ' + stockPrice[dataIndex] + '<br/>';
+
+                        return result;
+                    }
+                },
+                legend: {
+                    data: legendList,
+                     selectedMode: 'multiple',
+                    // type: 'scroll',
+                    orient: 'vertical',
+                    right: 10,
+                    top: 20,
+                    bottom: 20,
+                },
+                xAxis: {
+                    type: 'category',
+                    data: dateList
+                },
+                yAxis: {
+                    type: 'value',
+                    name: '百分比变化 (%)'
+                },
+                // 添加 dataZoom 配置
+                dataZoom: [
+                    {
+                        type: 'slider', // 缩放条
+                        start: 0,
+                        end: 100
+                    },
+                    {
+                        type: 'inside', // 鼠标滚轮缩放
+                        start: 0,
+                        end: 100
+                    }
+                ],
+
+                series: legendList.map(function (name, index) {
+                    console.log(name)
+                    return {
+                        name: name,
+                        type: 'line',
+                        emphasis: {
+                            focus: 'series',
+                            blurScope: 'coordinateSystem' // 高亮仍然保持，直到鼠标离开坐标系
+
+                        },
+                        data: calculatePercentageChanges(stockPriceList[index])
+                    };
+                })
+            };
+
+            return option;
+        }
+
+
+    </script>
+</body>
+</html>
