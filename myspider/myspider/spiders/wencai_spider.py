@@ -5,9 +5,6 @@ import re
 
 import scrapy
 from datetime import datetime, timedelta
-import sys
-
-sys.path.append('/Users/mac/python_project/gp_crawler/myspider/myspider/')
 
 from myspider.repo.common_repo import CommonRepo
 
@@ -70,10 +67,22 @@ class MySpider(scrapy.Spider):
     # https://www.iwencai.com/unifiedwap/result?w=2023-12-11%E7%9A%84%E4%BA%8C%E7%BA%A7%E8%A1%8C%E4%B8%9A%E6%9D%BF%E5%9D%97%E6%88%96%E4%B8%8A%E8%AF%81%E6%8C%87%E6%95%B0%E7%9A%84%E6%B6%A8%E8%B7%8C%E5%B9%85%E6%8E%92%E8%A1%8C%E4%B8%8E%E4%BB%B7%E6%A0%BC&querytype=zhishu
     commonRepo = CommonRepo()
     def start_requests(self):
-        start_date = datetime(2023, 12, 6)  # 指定年、月、日
-        current_date = start_date
-        end_date =  datetime(2023, 12, 24)
+        # start_date = datetime(2023, 12, 6)  # 指定年、月、日
+        # end_date = datetime(2023, 12, 24)
 
+        # 获取今天的日期
+        today = datetime.now().date()
+
+        # 计算一周前的日期
+        start_date = today - timedelta(days=7)
+
+        # 结束日期为今天
+        end_date = today
+        current_date = start_date
+
+        print("开始时间:", start_date)
+        print("结束时间:", end_date)
+        
         while current_date <= end_date:
             print(current_date.strftime('%Y-%m-%d'))
             current_date += timedelta(days=1)

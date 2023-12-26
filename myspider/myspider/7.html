@@ -40,7 +40,16 @@
 </style>
 
 <body>
-<div id="container" style="width: 95%; height: 90%"></div>
+<div id="container" style="width: 95%; height: 92%"></div>
+<div style="left: 40%;
+    position: absolute;
+    top: 1.5%;
+    display: flex;
+    font-size: 2px;
+    align-items: center;">
+    <input type="checkbox" id="selectAll" onchange="toggleAllSeries()">
+    <label for="selectAll">全选</label>
+</div>
 <script>
     // 访问路径：file:///C:/python_project/gp_crawler/myspider/myspider/5.html?days=12
     // 入参: days： 取正常日的天数的范围
@@ -101,7 +110,7 @@
                 }
             },
             navigator: {
-                // enabled: false
+                enabled: false
             },
 
             // 图例配置
@@ -146,6 +155,7 @@
                 selected: 4
             },
             xAxis: {
+
                 crosshair: {
                     label: {
                         enabled: true
@@ -653,8 +663,67 @@
 //         }
 //     });
 </script>
-<input type="checkbox" id="selectAll" onchange="toggleAllSeries()">
-<label for="selectAll">全选/反选</label>
 
+<div class="xuangu" style="margin:1.8%;margin-top:0%; padding-bottom:2%">
+    <style>
+        .xuangu a {
+            padding-right: 4%;
+        }
+    </style>
+    <span style="margin-bottom: -10px;
+    display: block;"><b font-size="15px">选股策略</b></span>
+    <br>
+    <span><b>板块&概念</b></span>
+    <br>
+    <span><b>抄底</b></span>
+    <a target="_blank" href="http://www.iwencai.com/unifiedwap/result?w=%E3%80%90bk-2mouth-zhicheng%E3%80%91%E4%BA%8C%E7%BA%A7%E8%A1%8C%E4%B8%9A%E6%9D%BF%E5%9D%97%20%EF%BC%88%E4%BB%8A%E6%97%A5%E7%9A%84%E5%BC%80%E7%9B%98%E4%BB%B7-%EF%BC%883%E4%B8%AA%E6%9C%88%E5%86%85%E7%9A%84%E5%8C%BA%E9%97%B4%E6%9C%80%E4%BD%8E%E4%BB%B7%EF%BC%89%EF%BC%89%2F%E4%BB%8A%E6%97%A5%E7%9A%84%E5%BC%80%E7%9B%98%E4%BB%B7%E5%A4%A7%E4%BA%8E-3%25%E5%B0%8F%E4%BA%8E3%25%EF%BC%9B%E4%B8%94%E6%8C%89%EF%BC%88%E4%BB%8A%E6%97%A5%E7%9A%84%E5%BC%80%E7%9B%98%E4%BB%B7-%EF%BC%883%E4%B8%AA%E6%9C%88%E5%86%85%E7%9A%84%E5%8C%BA%E9%97%B4%E6%9C%80%E4%BD%8E%E4%BB%B7%EF%BC%89%EF%BC%89%2F%E4%BB%8A%E6%97%A5%E7%9A%84%E5%BC%80%E7%9B%98%E4%BB%B7%E5%8D%87%E5%BA%8F%E6%8E%92%E5%BA%8F&querytype=zhishu&issugs">跌回支撑位</a>
+
+    <a target="_blank" href="http://www.iwencai.com/unifiedwap/result?w=%E4%BA%8C%E7%BA%A7%E8%A1%8C%E4%B8%9A%E6%9D%BF%E5%9D%97%EF%BC%9B%E8%BF%914%E4%B8%AA%E4%BA%A4%E6%98%93%E6%97%A5%E6%9C%89%3E%3D1%E6%AC%A1%E7%9A%84%E6%B6%A8%E8%B7%8C%E5%B9%85%3C-2%25%3B%E8%BF%915%E4%B8%AA%E4%BA%A4%E6%98%93%E6%97%A5%E6%9C%89%3E%3D3%E6%AC%A1%E9%98%B4%E7%BA%BF%EF%BC%9B%E4%BB%8A%E6%97%A5%E6%B6%A8%E8%B7%8C%E5%B9%85%3E0%25&querytype=zhishu&issugs">底分型</a>
+
+    <a target="_blank" href="http://www.iwencai.com/unifiedwap/result?w=%E4%BA%8C%E7%BA%A7%E8%A1%8C%E4%B8%9A%E6%9D%BF%E5%9D%97%EF%BC%9B%E8%BF%914%E4%B8%AA%E4%BA%A4%E6%98%93%E6%97%A5%E5%87%BA%E7%8E%B0%E5%9D%87%E7%BA%BF%E7%B2%98%E5%90%88&querytype=zhishu&issugs">均线粘合</a>
+
+    <a target="_blank" href="http://www.iwencai.com/unifiedwap/result?w=%E3%80%905shang10%E3%80%915%E6%97%A5%E7%BA%BF%E5%8D%B3%E5%B0%86%E4%B8%8A%E7%A9%BF10%E6%97%A5%E7%BA%BF%EF%BC%9B%E6%9D%BF%E5%9D%97%E6%8C%87%E6%95%B0%EF%BC%9B%E6%8E%92%E9%99%A4%E5%90%8C%E8%8A%B1%E9%A1%BA%E7%89%B9%E8%89%B2%E6%8C%87%E6%95%B0%EF%BC%9B%E6%8E%92%E9%99%A4%E5%90%8C%E8%8A%B1%E9%A1%BA%E5%9C%B0%E5%9F%9F%E6%8C%87%E6%95%B0&querytype=zhishu&issugs">5日线将上穿10日线</a>
+
+    <span><b>资金</b></span>
+
+    <a target="_blank" href="http://www.iwencai.com/unifiedwap/result?w=%E6%A6%82%E5%BF%B5%E6%8C%87%E6%95%B0%E6%88%96%E8%A1%8C%E4%B8%9A%E6%9D%BF%E5%9D%975%E4%B8%AA%E4%BA%A4%E6%98%93%E6%97%A5dde%E6%8E%92%E8%A1%8C%EF%BC%9B&querytype=zhishu&issugs">近5个交易日dde排行</a>
+
+    <span><b>涨跌排行</b></span>
+
+    <a target="_blank" href="http://www.iwencai.com/unifiedwap/result?w=10%E5%A4%A9%E7%9A%84%E5%8C%BA%E9%97%B4%E6%B6%A8%E8%B7%8C%E5%B9%85%E6%8E%92%E8%A1%8C%EF%BC%9B%E5%B1%9E%E4%BA%8E%E4%B8%89%E7%BA%A7%E8%A1%8C%E4%B8%9A%E6%88%96%E8%80%85%E5%B1%9E%E4%BA%8E%E4%BA%8C%E7%BA%A7%E8%A1%8C%E4%B8%9A&querytype=zhishu&issugs">近10天涨跌幅排行</a>
+
+    <hr>
+    <span><b>etf</b></span>
+    <br>
+    <span><b>抄底</b></span>
+    <a target="_blank" href="http://www.iwencai.com/unifiedwap/result?w=%E3%80%90etf-zhicheng%E3%80%91%E8%82%A1%E7%A5%A8%E5%9E%8Betf%3B%EF%BC%88%E4%BB%8A%E6%97%A5%E7%9A%84%E5%BC%80%E7%9B%98%E4%BB%B7-%EF%BC%883%E4%B8%AA%E6%9C%88%E5%86%85%E7%9A%84%E5%8C%BA%E9%97%B4%E6%9C%80%E4%BD%8E%E4%BB%B7%EF%BC%89%EF%BC%89%2F%E4%BB%8A%E6%97%A5%E7%9A%84%E5%BC%80%E7%9B%98%E4%BB%B7%E5%A4%A7%E4%BA%8E-2%25%E5%B0%8F%E4%BA%8E2%25%EF%BC%9B%E4%B8%94%E6%8C%89%EF%BC%88%E4%BB%8A%E6%97%A5%E7%9A%84%E5%BC%80%E7%9B%98%E4%BB%B7-%EF%BC%883%E4%B8%AA%E6%9C%88%E5%86%85%E7%9A%84%E5%8C%BA%E9%97%B4%E6%9C%80%E4%BD%8E%E4%BB%B7%EF%BC%89%EF%BC%89%2F%E4%BB%8A%E6%97%A5%E7%9A%84%E5%BC%80%E7%9B%98%E4%BB%B7%E5%8D%87%E5%BA%8F%E6%8E%92%E5%BA%8F%EF%BC%9B%2010%E5%A4%A9%E5%86%85%E6%9C%89%3E%3D1%E6%AC%A1%E7%9A%84%E6%B6%A8%E8%B7%8C%E5%B9%85%3C-1.9%25%EF%BC%9B%E4%BB%8A%E6%97%A5%E9%98%B3%E7%BA%BF&querytype=fund&issugs">跌回支撑位</a>
+
+
+    <a target="_blank" href="http://www.iwencai.com/unifiedwap/result?w=%E8%82%A1%E7%A5%A8%E5%9E%8Betf%EF%BC%9B%E8%BF%914%E4%B8%AA%E4%BA%A4%E6%98%93%E6%97%A5%E6%9C%89%3E%3D1%E6%AC%A1%E7%9A%84%E6%B6%A8%E8%B7%8C%E5%B9%85%3C-2%25%3B%E8%BF%915%E4%B8%AA%E4%BA%A4%E6%98%93%E6%97%A5%E6%9C%89%3E%3D3%E6%AC%A1%E9%98%B4%E7%BA%BF%EF%BC%9B%E4%BB%8A%E6%97%A5%E6%B6%A8%E8%B7%8C%E5%B9%85%3E0&querytype=fund&issugs">底分型</a>
+
+    <a target="_blank" href="http://www.iwencai.com/unifiedwap/result?w=%E3%80%90etf%20nianhe%E3%80%91%E8%82%A1%E7%A5%A8%E5%9E%8Betf%EF%BC%9B%E8%BF%914%E4%B8%AA%E4%BA%A4%E6%98%93%E6%97%A5%E5%87%BA%E7%8E%B0%E5%9D%87%E7%BA%BF%E7%B2%98%E5%90%88%EF%BC%9B&querytype=fund&issugs">均线粘合</a>
+
+    <a target="_blank" href="http://www.iwencai.com/unifiedwap/result?w=%E3%80%90etf-5shangchuan10%E3%80%91%E8%82%A1%E7%A5%A8%E5%9E%8Betf%EF%BC%9B5%E6%97%A5%E7%BA%BF%E5%8D%B3%E5%B0%86%E4%B8%8A%E7%A9%BF10%E6%97%A5%E7%BA%BF%EF%BC%9B10%E5%A4%A9%E5%86%85%E6%9C%89%3E%3D1%E6%AC%A1%E7%9A%84%E6%B6%A8%E8%B7%8C%E5%B9%85%3C-1.8%25&querytype=fund&issugs">5日线将上穿10日线</a>
+
+    <span><b>资金</b></span>
+
+    <a target="_blank" href="http://www.iwencai.com/unifiedwap/result?w=%E3%80%90etf-dde-paihan%E3%80%91%E8%82%A1%E7%A5%A8%E5%9E%8Betf%EF%BC%9B4%E5%A4%A9%E7%9A%84%E8%B5%84%E9%87%91%E6%B5%81%E5%85%A5%E6%8E%92%E8%A1%8C%EF%BC%9B10%E5%A4%A9%E5%86%85%E6%9C%89%3E%3D1%E6%AC%A1%E7%9A%84%E6%B6%A8%E8%B7%8C%E5%B9%85%3C-1.8%25&querytype=fund&issugs">4天的资金流入排行</a>
+
+    <span><b>涨跌排行</b></span>
+
+    <a target="_blank" href="http://www.iwencai.com/unifiedwap/result?w=%E3%80%90etf-zhangdie%E3%80%9110%E5%A4%A9%E7%9A%84%E5%8C%BA%E9%97%B4%E6%B6%A8%E8%B7%8C%E5%B9%85%E6%8E%92%E8%A1%8C%EF%BC%9B%E8%82%A1%E7%A5%A8%E5%9E%8Betf%EF%BC%9B10%E5%A4%A9%E5%86%85%E6%9C%89%3E%3D1%E6%AC%A1%E7%9A%84%E6%B6%A8%E8%B7%8C%E5%B9%85%3C-1.8%25&querytype=fund&issugs">近10天涨跌幅排行</a>
+
+
+    <hr>
+    <span><b>我的自选</b></span>
+    <br>
+    <span><b>抄底</b></span>
+
+    <a target="_blank" href="http://www.iwencai.com/unifiedwap/result?w=%EF%BC%88%E4%BB%8A%E6%97%A5%E7%9A%84%E5%BC%80%E7%9B%98%E4%BB%B7-%EF%BC%883%E4%B8%AA%E6%9C%88%E5%86%85%E7%9A%84%E5%8C%BA%E9%97%B4%E6%9C%80%E4%BD%8E%E4%BB%B7%EF%BC%89%EF%BC%89%2F%E4%BB%8A%E6%97%A5%E7%9A%84%E5%BC%80%E7%9B%98%E4%BB%B7%E5%A4%A7%E4%BA%8E-3%25%E5%B0%8F%E4%BA%8E3%25%EF%BC%9B%E4%B8%94%E6%8C%89%EF%BC%88%E4%BB%8A%E6%97%A5%E7%9A%84%E5%BC%80%E7%9B%98%E4%BB%B7-%EF%BC%883%E4%B8%AA%E6%9C%88%E5%86%85%E7%9A%84%E5%8C%BA%E9%97%B4%E6%9C%80%E4%BD%8E%E4%BB%B7%EF%BC%89%EF%BC%89%2F%E4%BB%8A%E6%97%A5%E7%9A%84%E5%BC%80%E7%9B%98%E4%BB%B7%E5%8D%87%E5%BA%8F%E6%8E%92%E5%BA%8F&querytype=zhishu&addSign=1703598617857">跌回支撑位</a>
+
+    <a target="_blank" href="http://www.iwencai.com/unifiedwap/result?w=%E8%BF%914%E4%B8%AA%E4%BA%A4%E6%98%93%E6%97%A5%E5%87%BA%E7%8E%B0%E5%9D%87%E7%BA%BF%E7%B2%98%E5%90%88&querytype=zhishu&addSign=1703598420029">我的自选均线粘合</a>
+
+
+</div>
 </body>
 </html>
